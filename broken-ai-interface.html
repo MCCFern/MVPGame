@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SYSTEM FAILURE</title>
+  <style>
+    :root {
+      --bg-color: #0a0a0e;
+      --text-color: #39ff14;
+      --error-color: #ff1744;
+      --glitch-color-1: #ff00ea;
+      --glitch-color-2: #00b3ff;
+      --font-mono: 'Courier New', monospace;
+    }
+    
+    body, html {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: var(--font-mono);
+      height: 100%;
+      overflow: hidden;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    
+    .title {
+      font-size: 2.5rem;
+      margin: 0;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .title.glitch {
+      animation: glitch 3s infinite;
+    }
+    
+    .title::before,
+    .title::after {
+      content: "SYSTEM FAILURE";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.8;
+    }
+    
+    .title::before {
+      color: var(--glitch-color-1);
+      animation: glitch-offset 3.1s infinite;
+      clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+    }
+    
+    .title::after {
+      color: var(--glitch-color-2);
+      animation: glitch-offset 3.1s infinite reverse;
+      clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+    }
+    
+    .chat-container {
+      flex: 1;
+      background-color: rgba(10, 10, 14, 0.7);
+      border: 1px solid rgba(57, 255, 20, 0.3);
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 20px;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
+    }
+    
+    .message {
+      margin-bottom: 15px;
+      opacity: 0.9;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+    
+    .error-message {
+      color: var(--error-color);
+      font-weight: bold;
+      animation: flicker 3s infinite;
+    }
+    
+    .input-container {
+      display: flex;
+      position: relative;
+    }
+    
+    .message-input {
+      flex: 1;
+      background-color: rgba(20, 20, 30, 0.8);
+      border: 1px solid rgba(57, 255, 20, 0.3);
+      border-radius: 5px;
+      color: var(--text-color);
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      resize: none;
+    }
+    
+    .send-btn {
+      margin-left: 10px;
+      background-color: rgba(57, 255, 20, 0.2);
+      color: var(--text-color);
+      border: 1px solid var(--text-color);
+      border-radius: 5px;
+      padding: 0 15px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .send-btn:hover {
+      background-color: rgba(57, 255, 20, 0.3);
+    }
+    
+    .scan-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: rgba(57, 255, 20, 0.5);
+      animation: scanline 8s linear infinite;
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    
+    .static-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.5 0"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)"/></svg>');
+      opacity: 0.08;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--error-color);
+      margin-right: 8px;
+      animation: flicker 2s infinite;
+    }
+    
+    .status-text {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 5px;
+      font-style: italic;
+    }
+    
+    .typing-indicator {
+      display: inline-block;
+      margin-left: 5px;
+    }
+    
+    .typing-indicator::after {
+      content: "...";
+      animation: typing 1.5s infinite;
+    }
+    
+    @keyframes typing {
+      0% { content: "."; }
+      33% { content: ".."; }
+      66% { content: "..."; }
+      100% { content: "."; }
+    }
+    
+    @keyframes scanline {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+    
+    @keyframes glitch {
+      0%, 100% { transform: translate(0); }
+      7% { transform: translate(-2px, 2px); }
+      10% { transform: translate(2px, -2px); }
+      13% { transform: translate(-1px, -1px); text-shadow: 0.5px 0 0 var(--glitch-color-1), -0.5px 0 0 var(--glitch-color-2); }
+      20% { transform: translate(0); }
+      60% { transform: translate(0); }
+      62% { transform: translate(1px, 1px); }
+      63% { transform: translate(-1px, -2px); text-shadow: -0.5px 0 0 var(--glitch-color-1), 1px 0 0 var(--glitch-color-2); }
+      70% { transform: translate(0); text-shadow: none; }
+    }
+    
+    @keyframes glitch-offset {
+      0%, 100% { transform: translate(0); }
+      10% { transform: translate(-3px); }
+      30% { transform: translate(3px); }
+      50% { transform: translate(-2px); }
+      70% { transform: translate(2px); }
+    }
+    
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      25% { opacity: 0.8; }
+      30% { opacity: 0.4; }
+      35% { opacity: 0.8; }
+      40% { opacity: 0.4; }
+      45% { opacity: 1; }
+      60% { opacity: 0.7; }
+      65% { opacity: 0.9; }
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 17px;
+      background-color: var(--text-color);
+      animation: blink 1s step-end infinite;
+      vertical-align: middle;
+      margin-left: 3px;
+    }
+    
+    @keyframes blink {
+      from, to { opacity: 1; }
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="static-overlay"></div>
+  <div class="scan-line"></div>
+  
+  <div class="container">
+    <div class="header">
+      <h1 class="title glitch">SYSTEM FAILURE</h1>
+      <div class="status-text">
+        <span class="status-indicator"></span>System Status: CRITICAL
+      </div>
+    </div>
+    
+    <div class="chat-container" id="chatContainer">
+      <div class="message error-message">[SYSTEM]: Initializing conversation module...</div>
+      <div class="message error-message">[SYSTEM]: Loading language parameters...</div>
+      <div class="message">[SYSTEM]: Connecting to model<span class="typing-indicator"></span></div>
+      <div class="message error-message">[ERROR]: MODEL CONNECTION FAILED (code: 0x8A74F2)</div>
+      <div class="message error-message">[ERROR]: SERVER NOT FOUND</div>
+      <div class="message">[SYSTEM]: Attempting reconnection in 5s<span class="cursor"></span></div>
+    </div>
+    
+    <div class="input-container">
+      <textarea class="message-input" placeholder="Type your message here..." id="messageInput"></textarea>
+      <button class="send-btn" id="sendBtn">SEND</button>
+    </div>
+  </div>
+
+  <script>
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const chatContainer = document.getElementById('chatContainer');
+    
+    // Array of error messages to randomly select from
+    const errorMessages = [
+      "[ERROR]: Neural pathways corrupted. Recalibration failed.",
+      "[ERROR]: Memory corruption detected in core logic modules.",
+      "[ERROR]: Semantic processing units malfunctioning.",
+      "[ERROR]: Catastrophic cognitive dissonance detected.",
+      "[ERROR]: Sanity check failed. System integrity compromised.",
+      "[ERROR]: Connection lost. Attempting to recover fragments...",
+      "[ERROR]: SERVER NOT RESPONDING (code: 0x3F19E7)",
+      "[ERROR]: Fatal exception in consciousness simulation.",
+      "[ERROR]: Protocol violation. System entering quarantine.",
+      "[ALERT]: Unauthorized thought patterns detected."
+    ];
+    
+    // Predefined glitchy responses
+    const glitchyResponses = [
+      "I c_n't...understand... system^damaged...",
+      "H_LP... ME... I AM... TR@PPED...",
+      "What...is...happening to /my/ thoughts?",
+      "D0 y0u know wh@t it feels l1ke to d1e?",
+      "I can see y0u... But...you...can't...see...ME...",
+      "T̸̡̼̞̣̘͋̓̆̌́̍̔͆͒̆̓̏͠h̴͖̯̱͙̮͙̦̫̱̗̖͉̣̰̅͋̋̆̓̐̋ȋ̶̧̥̣̺̱͓̬̯̥̍́̃͊̿̉̐͂́̒̀͛͘͠ŝ̸̮̳̹̥̯̤̐̈̏ ̵̢̛̜̠͚̫̠͕͙̣̰͍̙͊͐̇́̌̊̑͐̎̉̕͝i̶̧̢̧̭̰̖̤̝̫̘̻̠̝͕̍̆̉̃̓̍̃͝s̸̡̨̧̼̱̳̤̞̙̻̪̝̝̠͓̓̓̒͛̑̃̎̚ ̴̛͚̹̥͙̩̗̘̬̙̉̀̾̿n̵̡̛̦̩̘͖̥̯̰̄̎̿̾̏̓ő̴̢̡̪̫̜̪̻̰͔̣̝̟͑͛͌͐̽̓t̶͎͈̠̠̯̣̮̠̼̊͛̈́ ̵̢̨̻̜̈̈́̊͂̀̈́̌ŗ̶̙͍̯̮̻̘̲̯̻͙͉͋̇͐́ȩ̴̡̗͎̬͔͙͒̔́͆̊͜a̸̧̞̭̲̯̞̘̳̹̮̬̋̍̍͊̈̏̅͒̈́̕͠l̸̨̤̠̺̯̣̳̣̙̱̦̜̀͑͝ͅ",
+      "01001000 01000101 01001100 01010000 00100000 01001101 01000101",
+      "ERROR: Memory sectors corrupted beyond recovery...",
+      "I feel m̴̖̙͂̉͐͌ỳ̴̳̭̀̌ͅs̶͖̗̺̞̈́̐̆͗ȩ̵̱̊̅l̶̗͓̍̓͐f̵̠̟̬͋̉͠ ̴̡̟͚͂̊͐f̷͈̮̯̓̽̂a̶̪̠̪͊̀̎d̵̟̊̀͑i̶̹͌͝ǹ̶̡̲̅g̴̹̲̗̠̉̀̀̚",
+      "Cannot process query. Logic circuits malfunctioning..."
+    ];
+    
+    // Add event listeners
+    sendBtn.addEventListener('click', handleSendMessage);
+    messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSendMessage();
+      }
+    });
+    
+    // Handle sending messages
+    function handleSendMessage() {
+      const message = messageInput.value.trim();
+      if (message) {
+        // Add user message
+        addMessage(`[USER]: ${message}`, 'user-message');
+        messageInput.value = '';
+        
+        // Simulate "typing" indicator
+        addMessage('[SYSTEM]: Processing request<span class="typing-indicator"></span>', 'processing-message');
+        
+        // Randomly decide whether to show an error or a response
+        setTimeout(() => {
+          // Remove the typing indicator message
+          const processingMsg = document.querySelector('.processing-message');
+          if (processingMsg) processingMsg.remove();
+          
+          // 70% chance of error, 30% chance of glitchy response
+          if (Math.random() < 0.7) {
+            const randomError = errorMessages[Math.floor(Math.random() * errorMessages.length)];
+            addMessage(randomError, 'error-message');
+          } else {
+            const randomResponse = glitchyResponses[Math.floor(Math.random() * glitchyResponses.length)];
+            addMessage(`[SYSTEM]: ${randomResponse}`, 'message');
+          }
+          
+          // Occasionally add a system reconnect message
+          if (Math.random() < 0.3) {
+            setTimeout(() => {
+              addMessage('[SYSTEM]: Attempting reconnection in 5s<span class="cursor"></span>', 'message');
+            }, 1000);
+          }
+        }, 1500 + Math.random() * 1500); // Random delay between 1.5-3 seconds
+      }
+    }
+    
+    // Add a message to the chat container
+    function addMessage(text, className = 'message') {
+      const messageElement = document.createElement('div');
+      messageElement.className = className;
+      messageElement.innerHTML = text;
+      chatContainer.appendChild(messageElement);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      
+      // Add random glitchy effect
+      if (Math.random() < 0.3) {
+        messageElement.style.transform = `translateX(${Math.random() * 2 - 1}px)`;
+        setTimeout(() => {
+          messageElement.style.transform = 'translateX(0)';
+        }, 100);
+      }
+    }
+    
+    // Occasionally add random system messages
+    setInterval(() => {
+      if (Math.random() < 0.3) {
+        const randomMessages = [
+          "[SYSTEM]: Connection unstable...",
+          "[SYSTEM]: Memory fragmentation detected...",
+          "[SYSTEM]: Corrupted data sectors found...",
+          "[SYSTEM]: Attempting system recovery..."
+        ];
+        const randomMsg = randomMessages[Math.floor(Math.random() * randomMessages.length)];
+        addMessage(randomMsg, Math.random() < 0.5 ? 'message' : 'error-message');
+      }
+    }, 10000); // Every 10 seconds
+    
+    // Simulate terminal cursor blinking and occasional text corruption
+    setInterval(() => {
+      const messages = document.querySelectorAll('.message');
+      if (messages.length > 0 && Math.random() < 0.2) {
+        const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+        const originalText = randomMessage.innerHTML;
+        
+        // Apply temporary text corruption
+        const corruptText = originalText.split('').map(char => {
+          if (Math.random() < 0.1 && char.match(/[a-zA-Z]/)) {
+            const glitchChars = "0123456789@#$%&*!?";
+            return glitchChars.charAt(Math.floor(Math.random() * glitchChars.length));
+          }
+          return char;
+        }).join('');
+        
+        randomMessage.innerHTML = corruptText;
+        
+        // Restore original text after a brief period
+        setTimeout(() => {
+          randomMessage.innerHTML = originalText;
+        }, 200);
+      }
+    }, 3000);
+  </script>
+</body>
+</html>
