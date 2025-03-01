@@ -45,6 +45,56 @@
             font-size: 14px;
             text-align: center;
         }
+        
+        /* API key section with arcade style */
+        .api-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            border: 1px dashed #333;
+        }
+        
+        .coin-text {
+            font-family: 'Courier New', monospace;
+            color: #ffcc00;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ff6600;
+            transform: rotate(-2deg);
+            font-size: 16px;
+            animation: pulse 2s infinite;
+            letter-spacing: 1px;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+        
+        #api-key-input {
+            padding: 5px 10px;
+            font-size: 14px;
+            width: 250px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid #444;
+            color: #e0e0e0;
+            border-radius: 4px;
+        }
+        
+        #reset-key {
+            font-size: 14px;
+            cursor: pointer;
+            background: #4a26ab;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
 
         /* Chat container where messages appear */
         .chat-container {
@@ -55,6 +105,29 @@
             background-color: rgba(0, 0, 0, 0.2);
             border: 1px solid #333;
             border-radius: 4px;
+            /* Scrollbar styling */
+            scrollbar-width: thin;
+            scrollbar-color: #4a26ab #1a1a1a;
+        }
+        
+        /* Webkit scrollbar styles (Chrome, Safari, newer Edge) */
+        .chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .chat-container::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 4px;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb {
+            background-color: #4a26ab;
+            border-radius: 4px;
+            border: 2px solid #1a1a1a;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb:hover {
+            background-color: #5b37bc;
         }
 
         /* Styling for user messages */
@@ -168,7 +241,7 @@
             font-family: 'Courier New', monospace;
         }
 
-        .send-button {
+        .send-button, .clear-button, .export-button {
             background-color: #4a26ab;
             color: white;
             border: none;
@@ -203,10 +276,13 @@
         <!-- Warning banner to set the ARG mood -->
         <div class="warning-banner">
             WARNING: This is an experimental model. Results may be unpredictable. Use at your own risk.
-            <div style="float:right; display: flex; align-items: center; gap: 10px;">
-                <input type="text" id="api-key-input" placeholder="Enter Gemini API Key" style="padding: 2px 5px; font-size: 12px; width: 200px; background: rgba(0,0,0,0.2); border: 1px solid #333; color: #e0e0e0;">
-                <button id="reset-key" style="font-size: 12px; cursor: pointer; background: none; border: none; color: #ff8c00; padding: 0;">Reset</button>
-            </div>
+        </div>
+        
+        <!-- API key section with arcade-style text -->
+        <div class="api-section">
+            <div class="coin-text">YOUR KEY HERE!</div>
+            <input type="text" id="api-key-input" placeholder="Enter Gemini API Key">
+            <button id="reset-key">Reset</button>
         </div>
         
         <!-- Chat container where messages will appear -->
@@ -221,8 +297,8 @@
         <div class="input-container">
             <input type="text" class="input-box" id="user-input" placeholder="Type your message here...">
             <button class="send-button" id="send-button">Send</button>
-            <button class="clear-button" id="clear-chat" style="background-color: #333; margin-left: 5px;">Clear</button>
-            <button class="export-button" id="export-chat" style="background-color: #333; margin-left: 5px;">Export</button>
+            <button class="clear-button" id="clear-chat">Clear</button>
+            <button class="export-button" id="export-chat">Export</button>
         </div>
     </div>
 
