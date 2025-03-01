@@ -1,1 +1,3 @@
 # MVPGame
+# HonestlyNoIdeaWhatToWriteHere
+# SoJustSomeTumblreseForNow
